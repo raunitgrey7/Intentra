@@ -161,3 +161,27 @@ docker run --rm -p 8000:8000 --env-file .env intentra-backend
 - Overpass data may have sparse metadata depending on location.
 - Ratings/open status for OSM are currently heuristic defaults.
 - Fallback tags are intentionally used to avoid zero-result responses.
+
+# Intentra Frontend
+
+React + Vite client for Intentra backend.
+
+## Run locally
+
+1. Install packages:
+
+npm install
+
+2. Start dev server:
+
+npm run dev
+
+3. Ensure backend is running at http://localhost:8000.
+
+Optional environment variable:
+- VITE_API_BASE_URL=http://localhost:8000
+
+## Build
+
+npm run build
+npm run preview
