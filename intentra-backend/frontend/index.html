@@ -1,0 +1,2418 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Intentra · Places that fit your moment</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+        crossorigin=""/>
+    <style>
+        :root {
+            /* Light theme */
+            --bg-primary: #ffffff;
+            --bg-secondary: #f8fafc;
+            --bg-tertiary: #f1f5f9;
+            --bg-surface: #ffffff;
+            --bg-surface-hover: #f8fafc;
+            --bg-surface-active: #f1f5f9;
+            --bg-accent: #3b82f6;
+            --bg-accent-hover: #2563eb;
+            --bg-accent-subtle: #eff6ff;
+            --bg-success: #10b981;
+            --bg-warning: #f59e0b;
+            --bg-error: #ef4444;
+            --bg-info: #3b82f6;
+            
+            --text-primary: #0f172a;
+            --text-secondary: #475569;
+            --text-tertiary: #64748b;
+            --text-accent: #3b82f6;
+            --text-on-accent: #ffffff;
+            --text-success: #047857;
+            --text-warning: #b45309;
+            --text-error: #dc2626;
+            
+            --border-light: #e2e8f0;
+            --border-medium: #cbd5e1;
+            --border-heavy: #94a3b8;
+            --border-accent: #3b82f6;
+            
+            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+            --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1);
+            --shadow-accent: 0 0 0 3px rgba(59, 130, 246, 0.1);
+            
+            --radius-sm: 0.375rem;
+            --radius-md: 0.5rem;
+            --radius-lg: 0.75rem;
+            --radius-xl: 1rem;
+            
+            --transition-fast: 150ms ease;
+            --transition-base: 250ms ease;
+            --transition-slow: 350ms ease;
+            
+            --spacing-xs: 0.25rem;
+            --spacing-sm: 0.5rem;
+            --spacing-md: 1rem;
+            --spacing-lg: 1.5rem;
+            --spacing-xl: 2rem;
+            --spacing-2xl: 3rem;
+        }
+
+        [data-theme="dark"] {
+            /* Dark theme */
+            --bg-primary: #0f172a;
+            --bg-secondary: #1e293b;
+            --bg-tertiary: #334155;
+            --bg-surface: #1e293b;
+            --bg-surface-hover: #334155;
+            --bg-surface-active: #475569;
+            --bg-accent: #3b82f6;
+            --bg-accent-hover: #60a5fa;
+            --bg-accent-subtle: rgba(59, 130, 246, 0.1);
+            --bg-success: #10b981;
+            --bg-warning: #f59e0b;
+            --bg-error: #ef4444;
+            --bg-info: #3b82f6;
+            
+            --text-primary: #f1f5f9;
+            --text-secondary: #cbd5e1;
+            --text-tertiary: #94a3b8;
+            --text-accent: #60a5fa;
+            --text-on-accent: #0f172a;
+            --text-success: #34d399;
+            --text-warning: #fbbf24;
+            --text-error: #f87171;
+            
+            --border-light: #334155;
+            --border-medium: #475569;
+            --border-heavy: #64748b;
+            --border-accent: #3b82f6;
+            
+            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.3);
+            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.3);
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.3);
+            --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.3);
+            --shadow-accent: 0 0 0 3px rgba(59, 130, 246, 0.2);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            font-size: 16px;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        body {
+            font-family: 'Manrope', 'Segoe UI', system-ui, sans-serif;
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            min-height: 100vh;
+            overflow-x: hidden;
+            transition: background-color var(--transition-base), color var(--transition-base);
+        }
+
+        /* Typography */
+        h1, h2, h3, h4 {
+            font-weight: 600;
+            line-height: 1.2;
+        }
+
+        .text-sm {
+            font-size: 0.875rem;
+        }
+
+        .text-base {
+            font-size: 1rem;
+        }
+
+        .text-lg {
+            font-size: 1.125rem;
+        }
+
+        .text-xl {
+            font-size: 1.25rem;
+        }
+
+        .text-2xl {
+            font-size: 1.5rem;
+        }
+
+        .text-3xl {
+            font-size: 1.875rem;
+        }
+
+        .font-medium {
+            font-weight: 500;
+        }
+
+        .font-semibold {
+            font-weight: 600;
+        }
+
+        .font-bold {
+            font-weight: 700;
+        }
+
+        /* Layout */
+        .container {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        /* Header */
+        .header {
+            background-color: var(--bg-secondary);
+            border-bottom: 1px solid var(--border-light);
+            padding: var(--spacing-lg) var(--spacing-xl);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(10px);
+            background-color: rgba(var(--bg-secondary-rgb), 0.8);
+        }
+
+        .header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+        }
+
+        .brand {
+            display: flex;
+            flex-direction: column;
+            gap: var(--spacing-xs);
+        }
+
+        .app-name {
+            font-size: 1.5rem;
+            font-weight: 800;
+            letter-spacing: 0.02em;
+            background: linear-gradient(135deg, #0f766e 0%, #d97706 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .tagline {
+            font-size: 0.875rem;
+            color: var(--text-tertiary);
+            font-weight: 400;
+        }
+
+        .header-controls {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-md);
+        }
+
+        /* Theme Toggle */
+        .theme-toggle {
+            background: none;
+            border: 1px solid var(--border-medium);
+            color: var(--text-secondary);
+            width: 40px;
+            height: 40px;
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all var(--transition-fast);
+            background-color: var(--bg-surface);
+        }
+
+        .theme-toggle:hover {
+            border-color: var(--border-accent);
+            color: var(--text-accent);
+            transform: translateY(-1px);
+        }
+
+        .theme-toggle svg {
+            width: 20px;
+            height: 20px;
+        }
+
+        /* Intent Input Section */
+        .intent-section {
+            background-color: var(--bg-primary);
+            padding: var(--spacing-xl) var(--spacing-xl);
+            border-bottom: 1px solid var(--border-light);
+        }
+
+        .intent-container {
+            max-width: 800px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        .intent-input-group {
+            display: flex;
+            gap: var(--spacing-md);
+            align-items: stretch;
+        }
+
+        .intent-input {
+            flex: 1;
+            padding: var(--spacing-lg);
+            border: 1px solid var(--border-medium);
+            border-radius: var(--radius-lg);
+            background-color: var(--bg-surface);
+            color: var(--text-primary);
+            font-size: 1.125rem;
+            transition: all var(--transition-base);
+            line-height: 1.5;
+        }
+
+        .intent-input::placeholder {
+            color: var(--text-tertiary);
+            font-style: italic;
+        }
+
+        .intent-input:focus {
+            outline: none;
+            border-color: var(--border-accent);
+            box-shadow: var(--shadow-accent);
+            background-color: var(--bg-surface-hover);
+        }
+
+        .find-button {
+            background-color: var(--bg-accent);
+            color: var(--text-on-accent);
+            border: none;
+            border-radius: var(--radius-lg);
+            padding: 0 var(--spacing-xl);
+            font-size: 1.125rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all var(--transition-base);
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+            white-space: nowrap;
+        }
+
+        .find-button:hover:not(:disabled) {
+            background-color: var(--bg-accent-hover);
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .find-button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        .find-button .spinner {
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .quick-intents {
+            display: flex;
+            flex-wrap: wrap;
+            gap: var(--spacing-sm);
+            margin-top: var(--spacing-md);
+        }
+
+        .search-controls {
+            margin-top: var(--spacing-md);
+            display: flex;
+            flex-wrap: wrap;
+            gap: var(--spacing-sm);
+            align-items: center;
+        }
+
+        .location-note {
+            margin-top: var(--spacing-sm);
+            font-size: 0.8rem;
+            color: var(--text-tertiary);
+        }
+
+        .control-pill {
+            border: 1px solid var(--border-medium);
+            border-radius: 999px;
+            padding: 0.32rem 0.65rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.45rem;
+            background: var(--bg-surface);
+            color: var(--text-secondary);
+            font-size: 0.78rem;
+        }
+
+        .control-pill input[type="checkbox"] {
+            accent-color: #0f766e;
+        }
+
+        .distance-slider {
+            width: 120px;
+        }
+
+        .intent-chip {
+            border: 1px solid var(--border-light);
+            background: var(--bg-surface);
+            color: var(--text-secondary);
+            border-radius: 999px;
+            padding: 0.42rem 0.75rem;
+            font-size: 0.82rem;
+            cursor: pointer;
+            transition: all var(--transition-fast);
+        }
+
+        .intent-chip:hover {
+            border-color: var(--border-accent);
+            color: var(--text-accent);
+            transform: translateY(-1px);
+        }
+
+        /* Intent Banner */
+        .intent-banner {
+            background-color: var(--bg-accent-subtle);
+            border: 1px solid var(--border-accent);
+            border-radius: var(--radius-lg);
+            padding: var(--spacing-lg);
+            margin-top: var(--spacing-lg);
+            display: none;
+            animation: slideDown 0.3s ease-out;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .intent-banner-content {
+            display: flex;
+            flex-direction: column;
+            gap: var(--spacing-xs);
+        }
+
+        .intent-summary {
+            font-size: 1.125rem;
+            font-weight: 500;
+            color: var(--text-accent);
+        }
+
+        .intent-details {
+            display: flex;
+            flex-wrap: wrap;
+            gap: var(--spacing-md);
+            margin-top: var(--spacing-xs);
+        }
+
+        .intent-detail {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-xs);
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+        }
+
+        .intent-detail svg {
+            width: 16px;
+            height: 16px;
+            opacity: 0.7;
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            display: grid;
+            grid-template-columns: minmax(0, 1.85fr) minmax(360px, 0.9fr);
+            min-height: calc(100vh - 240px);
+            max-width: 1400px;
+            margin: 0 auto;
+            width: 100%;
+            padding: var(--spacing-xl);
+            gap: var(--spacing-xl);
+        }
+
+        @media (max-width: 1024px) {
+            .main-content {
+                grid-template-columns: 1fr;
+                min-height: auto;
+            }
+        }
+
+        /* Map Container */
+        .map-container {
+            flex: 1;
+            min-width: 300px;
+            min-height: 76vh;
+            border-radius: var(--radius-xl);
+            overflow: hidden;
+            box-shadow: var(--shadow-lg);
+            background-color: var(--bg-tertiary);
+            position: relative;
+        }
+
+        #map {
+            width: 100%;
+            height: 100%;
+            min-height: 76vh;
+            background-color: var(--bg-tertiary);
+        }
+
+        .map-overlay {
+            position: absolute;
+            top: var(--spacing-md);
+            left: var(--spacing-md);
+            background-color: var(--bg-surface);
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-md);
+            padding: var(--spacing-sm) var(--spacing-md);
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            z-index: 400;
+            backdrop-filter: blur(10px);
+            background-color: rgba(var(--bg-surface-rgb), 0.9);
+        }
+
+        /* Results Panel */
+        .results-panel {
+            width: 100%;
+            min-width: 380px;
+            display: grid;
+            grid-template-rows: auto auto auto auto minmax(260px, 1fr);
+            background-color: var(--bg-secondary);
+            border-radius: var(--radius-xl);
+            border: 1px solid var(--border-light);
+            overflow: auto;
+            box-shadow: var(--shadow-lg);
+            max-height: 76vh;
+        }
+
+        .results-panel.expanded {
+            max-height: none;
+            min-height: 76vh;
+        }
+
+        .experience-panel {
+            margin: var(--spacing-lg);
+            padding: var(--spacing-md);
+            border: 1px dashed var(--border-medium);
+            border-radius: var(--radius-lg);
+            background: var(--bg-surface);
+        }
+
+        .insights-panel {
+            margin: 0 var(--spacing-lg) var(--spacing-lg);
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-lg);
+            background: var(--bg-surface);
+            padding: var(--spacing-md);
+        }
+
+        .insights-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 8px;
+            margin-top: 8px;
+            font-size: 0.78rem;
+            color: var(--text-secondary);
+        }
+
+        .insight-item {
+            border: 1px solid var(--border-light);
+            border-radius: 8px;
+            padding: 6px;
+            background: var(--bg-accent-subtle);
+        }
+
+        .matchup-box {
+            margin-top: 10px;
+            border-top: 1px solid var(--border-light);
+            padding-top: 10px;
+            font-size: 0.78rem;
+            color: var(--text-secondary);
+        }
+
+        .experience-panel h4 {
+            font-size: 0.95rem;
+            margin-bottom: var(--spacing-xs);
+        }
+
+        .experience-panel p {
+            font-size: 0.82rem;
+            color: var(--text-secondary);
+            margin-bottom: var(--spacing-sm);
+        }
+
+        .plan-steps {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            font-size: 0.8rem;
+        }
+
+        .plan-step {
+            padding: 6px 8px;
+            border-radius: 8px;
+            background: var(--bg-accent-subtle);
+            color: var(--text-secondary);
+        }
+
+        .favorites-panel {
+            margin: 0 var(--spacing-lg) var(--spacing-lg);
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-lg);
+            background: var(--bg-surface);
+            padding: var(--spacing-md);
+        }
+
+        .favorites-panel h4 {
+            font-size: 0.9rem;
+            margin-bottom: var(--spacing-sm);
+        }
+
+        .favorites-list {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+
+        @media (max-width: 1024px) {
+            .results-panel {
+                width: 100%;
+                min-width: 0;
+                max-height: none;
+                min-height: 62vh;
+            }
+
+            .results-panel.expanded {
+                min-height: 72vh;
+            }
+
+            .map-container,
+            #map {
+                min-height: 58vh;
+            }
+        }
+
+        .map-toolbar {
+            position: absolute;
+            right: var(--spacing-md);
+            top: var(--spacing-md);
+            z-index: 450;
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            background: var(--bg-surface);
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-md);
+            padding: 6px 8px;
+            box-shadow: var(--shadow-md);
+        }
+
+        .map-select {
+            border: 1px solid var(--border-medium);
+            border-radius: 8px;
+            padding: 4px 6px;
+            color: var(--text-secondary);
+            background: var(--bg-surface);
+            font-size: 0.75rem;
+        }
+
+        .emoji-marker {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            border: 2px solid #ffffff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 10px rgb(0 0 0 / 22%);
+            font-size: 15px;
+            background: #0f766e;
+        }
+
+        .emoji-marker.user {
+            background: #2563eb;
+            font-size: 13px;
+        }
+
+        .results-header {
+            padding: var(--spacing-lg);
+            border-bottom: 1px solid var(--border-light);
+            background-color: var(--bg-surface);
+        }
+
+        .result-tools {
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            flex-wrap: wrap;
+            gap: var(--spacing-sm);
+            margin-top: var(--spacing-sm);
+        }
+
+        .tool-button,
+        .sort-select {
+            border: 1px solid var(--border-medium);
+            background: var(--bg-surface);
+            color: var(--text-secondary);
+            border-radius: var(--radius-md);
+            padding: 0.45rem 0.65rem;
+            font-size: 0.82rem;
+            flex: 0 0 auto;
+        }
+
+        .sort-select {
+            margin-left: auto;
+            min-width: 150px;
+            max-width: 100%;
+        }
+
+        .tool-button {
+            cursor: pointer;
+        }
+
+        .tool-button:hover {
+            border-color: var(--border-accent);
+            color: var(--text-accent);
+        }
+
+        .results-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: var(--spacing-xs);
+        }
+
+        .results-subtitle {
+            color: var(--text-tertiary);
+            font-size: 0.875rem;
+        }
+
+        .results-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: var(--spacing-lg);
+            display: flex;
+            flex-direction: column;
+            gap: var(--spacing-md);
+            min-height: 280px;
+            max-height: 52vh;
+        }
+
+        .results-panel.expanded .results-list {
+            max-height: none;
+        }
+
+        @media (max-width: 768px) {
+            .sort-select {
+                margin-left: 0;
+                width: 100%;
+            }
+
+            .result-tools {
+                display: grid;
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+
+            .result-tools .sort-select {
+                grid-column: 1 / -1;
+            }
+        }
+
+        /* Empty State */
+        .empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: var(--spacing-2xl) var(--spacing-lg);
+            text-align: center;
+            color: var(--text-tertiary);
+        }
+
+        .empty-state svg {
+            width: 64px;
+            height: 64px;
+            margin-bottom: var(--spacing-lg);
+            opacity: 0.5;
+        }
+
+        .empty-state h3 {
+            font-size: 1.125rem;
+            margin-bottom: var(--spacing-sm);
+            color: var(--text-secondary);
+        }
+
+        .empty-state p {
+            font-size: 0.875rem;
+            max-width: 300px;
+            line-height: 1.5;
+        }
+
+        /* Recommendation Card */
+        .recommendation-card {
+            background-color: var(--bg-surface);
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-lg);
+            padding: var(--spacing-lg);
+            cursor: pointer;
+            transition: all var(--transition-base);
+            position: relative;
+        }
+
+        .recommendation-card:hover {
+            transform: translateY(-2px);
+            border-color: var(--border-accent);
+            box-shadow: var(--shadow-md);
+        }
+
+        .recommendation-card.active {
+            border-color: var(--border-accent);
+            background-color: var(--bg-accent-subtle);
+            box-shadow: var(--shadow-accent);
+        }
+
+        .recommendation-card.compare-selected {
+            outline: 2px solid #0f766e;
+            outline-offset: 2px;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: var(--spacing-sm);
+        }
+
+        .place-name {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            line-height: 1.3;
+        }
+
+        .distance {
+            font-size: 0.875rem;
+            color: var(--text-accent);
+            font-weight: 500;
+            white-space: nowrap;
+            background-color: var(--bg-accent-subtle);
+            padding: var(--spacing-xs) var(--spacing-sm);
+            border-radius: var(--radius-sm);
+        }
+
+        .why-text {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            line-height: 1.5;
+            margin-top: var(--spacing-sm);
+            display: -webkit-box;
+            line-clamp: 3;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .card-footer {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-md);
+            margin-top: var(--spacing-md);
+            padding-top: var(--spacing-md);
+            border-top: 1px solid var(--border-light);
+            flex-wrap: wrap;
+        }
+
+        .card-actions {
+            margin-left: auto;
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+        }
+
+        .card-action {
+            border: 1px solid var(--border-medium);
+            background: var(--bg-surface);
+            color: var(--text-secondary);
+            border-radius: var(--radius-sm);
+            padding: 0.3rem 0.55rem;
+            font-size: 0.76rem;
+            cursor: pointer;
+            text-decoration: none;
+        }
+
+        .card-action:hover {
+            border-color: var(--border-accent);
+            color: var(--text-accent);
+        }
+
+        .rating {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-xs);
+            font-size: 0.875rem;
+            color: var(--text-tertiary);
+        }
+
+        .status {
+            font-size: 0.75rem;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-weight: 500;
+        }
+
+        .status.open {
+            background-color: rgba(16, 185, 129, 0.1);
+            color: var(--text-success);
+        }
+
+        .status.closed {
+            background-color: rgba(239, 68, 68, 0.1);
+            color: var(--text-error);
+        }
+
+        /* Status Messages */
+        .status-area {
+            position: fixed;
+            bottom: var(--spacing-xl);
+            right: var(--spacing-xl);
+            max-width: 400px;
+            z-index: 1000;
+        }
+
+        .status-message {
+            background-color: var(--bg-surface);
+            border-left: 4px solid var(--border-accent);
+            border-radius: var(--radius-md);
+            padding: var(--spacing-md);
+            margin-top: var(--spacing-sm);
+            box-shadow: var(--shadow-xl);
+            display: flex;
+            align-items: flex-start;
+            gap: var(--spacing-md);
+            animation: slideInRight 0.3s ease-out;
+            transform-origin: right bottom;
+        }
+
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(100%);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .status-message.info {
+            border-left-color: var(--bg-info);
+        }
+
+        .status-message.success {
+            border-left-color: var(--bg-success);
+        }
+
+        .status-message.warning {
+            border-left-color: var(--bg-warning);
+        }
+
+        .status-message.error {
+            border-left-color: var(--bg-error);
+        }
+
+        .status-icon {
+            width: 20px;
+            height: 20px;
+            flex-shrink: 0;
+            margin-top: 1px;
+        }
+
+        .status-content {
+            flex: 1;
+        }
+
+        .status-title {
+            font-weight: 600;
+            margin-bottom: 2px;
+        }
+
+        .status-text {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            line-height: 1.4;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header {
+                padding: var(--spacing-md);
+            }
+            
+            .header-content {
+                flex-direction: column;
+                gap: var(--spacing-md);
+                align-items: stretch;
+            }
+            
+            .header-controls {
+                justify-content: flex-end;
+            }
+            
+            .intent-section {
+                padding: var(--spacing-lg) var(--spacing-md);
+            }
+            
+            .intent-input-group {
+                flex-direction: column;
+            }
+            
+            .find-button {
+                width: 100%;
+                justify-content: center;
+                padding: var(--spacing-md);
+            }
+            
+            .main-content {
+                padding: var(--spacing-md);
+                gap: var(--spacing-md);
+            }
+            
+            .status-area {
+                bottom: var(--spacing-md);
+                right: var(--spacing-md);
+                left: var(--spacing-md);
+                max-width: none;
+            }
+            
+            .status-message {
+                max-width: 100%;
+            }
+        }
+
+        /* Utility Classes */
+        .hidden {
+            display: none !important;
+        }
+
+        .fade-in {
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        /* Leaflet Dark Theme */
+        [data-theme="dark"] .leaflet-tile {
+            filter: brightness(0.6) invert(1) contrast(3) hue-rotate(200deg) saturate(0.3) brightness(0.7);
+        }
+
+        [data-theme="dark"] .leaflet-container {
+            background-color: var(--bg-tertiary);
+        }
+
+        .leaflet-control-container .leaflet-control {
+            background-color: var(--bg-surface);
+            color: var(--text-primary);
+            border: 1px solid var(--border-light);
+        }
+
+        .leaflet-control-zoom a {
+            color: var(--text-primary) !important;
+            background-color: var(--bg-surface) !important;
+            border-bottom: 1px solid var(--border-light) !important;
+        }
+
+        .leaflet-control-zoom a:hover {
+            background-color: var(--bg-surface-hover) !important;
+        }
+
+        .leaflet-popup-content {
+            color: var(--text-primary);
+            font-family: inherit;
+            padding: var(--spacing-sm);
+        }
+
+        .leaflet-popup-content-wrapper {
+            background-color: var(--bg-surface);
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .leaflet-popup-tip {
+            background-color: var(--bg-surface);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <div class="brand">
+                    <div class="app-name">Intentra</div>
+                    <div class="tagline">Places that fit your moment</div>
+                </div>
+                <div class="header-controls">
+                    <button id="themeToggle" class="theme-toggle" aria-label="Toggle theme">
+                        <svg id="themeIcon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" fill="currentColor"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Intent Input -->
+        <section class="intent-section">
+            <div class="intent-container">
+                <div class="intent-input-group">
+                    <input 
+                        type="text" 
+                        id="intentInput" 
+                        class="intent-input"
+                        placeholder="What are you in the mood for? e.g. quiet place to work"
+                        aria-label="Describe what you're looking for"
+                    />
+                    <button id="findButton" class="find-button">
+                        <span id="findButtonText">Find places</span>
+                    </button>
+                </div>
+
+                <div id="quickIntents" class="quick-intents"></div>
+
+                <div id="locationNote" class="location-note">Location status: waiting for permission.</div>
+
+                <div class="search-controls">
+                    <label class="control-pill">
+                        <span>Open now</span>
+                        <input id="openNowOnly" type="checkbox" />
+                    </label>
+                    <label class="control-pill">
+                        <span>Surprise</span>
+                        <input id="surpriseMode" type="checkbox" />
+                    </label>
+                    <label class="control-pill">
+                        <span>Max distance</span>
+                        <input id="maxDistance" class="distance-slider" type="range" min="1" max="20" value="8" />
+                        <span id="maxDistanceLabel">8 km</span>
+                    </label>
+                </div>
+                
+                <!-- Intent Banner -->
+                <div id="intentBanner" class="intent-banner hidden">
+                    <div class="intent-banner-content">
+                        <div id="intentSummary" class="intent-summary"></div>
+                        <div id="intentDetails" class="intent-details"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Map -->
+            <div class="map-container">
+                <div id="map"></div>
+                <div id="mapOverlay" class="map-overlay hidden">Center on your location</div>
+                <div class="map-toolbar">
+                    <button id="fitMapButton" class="tool-button" type="button">Fit map</button>
+                    <select id="mapStyleSelect" class="map-select" aria-label="Map style">
+                        <option value="standard">Classic</option>
+                        <option value="hot">Adventure</option>
+                        <option value="bw">Mono</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Results Panel -->
+            <aside class="results-panel">
+                <div class="results-header">
+                    <div class="results-title" id="resultsTitle">Nearby places</div>
+                    <div class="results-subtitle" id="resultsSubtitle">Select a place to see details</div>
+                    <div class="result-tools">
+                        <button id="locateButton" class="tool-button" type="button">Locate me</button>
+                        <button id="fitResultsButton" class="tool-button" type="button">Fit results</button>
+                        <button id="panelSizeButton" class="tool-button" type="button">Expand list</button>
+                        <button id="compareModeButton" class="tool-button" type="button">Compare mode</button>
+                        <button id="sharePlanButton" class="tool-button" type="button">Share plan</button>
+                        <select id="sortSelect" class="sort-select" aria-label="Sort recommendations">
+                            <option value="score">Sort: Best match</option>
+                            <option value="distance">Sort: Nearest first</option>
+                            <option value="rating">Sort: Top rated</option>
+                        </select>
+                    </div>
+                </div>
+
+                <section id="experiencePanel" class="experience-panel hidden">
+                    <h4 id="planHeadline">Experience plan</h4>
+                    <p id="planMeta"></p>
+                    <div id="planSteps" class="plan-steps"></div>
+                </section>
+
+                <section id="insightsPanel" class="insights-panel hidden">
+                    <h4>Discovery insights</h4>
+                    <div id="insightsGrid" class="insights-grid"></div>
+                    <div id="matchupBox" class="matchup-box"></div>
+                </section>
+
+                <section class="favorites-panel">
+                    <h4>Saved places</h4>
+                    <div id="favoritesList" class="favorites-list">No saved places yet.</div>
+                </section>
+                
+                <div class="results-list" id="resultsList">
+                    <!-- Empty state shown by default -->
+                    <div class="empty-state" id="emptyState">
+                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M12 21C16.9706 21 21 16.9706 21 12C21 7.02944 16.9706 3 12 3C7.02944 3 3 7.02944 3 12C3 16.9706 7.02944 21 12 21Z" stroke="currentColor" stroke-width="1.5"/>
+                            <path d="M12 8V12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                            <path d="M12 16H12.01" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                        </svg>
+                        <h3>Ready to explore</h3>
+                        <p>Tell us what you're looking for and we'll find places that match your moment</p>
+                    </div>
+                </div>
+            </aside>
+        </main>
+
+        <!-- Status Messages Area -->
+        <div class="status-area" id="statusArea"></div>
+    </div>
+
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+        crossorigin=""></script>
+
+    <!-- Application JavaScript -->
+    <script>
+        // Configuration
+        const CONFIG = {
+            API_ENDPOINT: '/recommend',
+            DEFAULT_LOCATION: { lat: 28.6139, lng: 77.2090 }, // New Delhi
+            LOCATION_CACHE_KEY: 'intentra-last-live-location',
+            MAP_ATTRIBUTION: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+            ZOOM_LEVEL: 14,
+            ZOOM_LEVEL_DETAIL: 16,
+            MAP_THEMES: {
+                standard: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+                hot: 'https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png',
+                bw: 'https://tiles.wmflabs.org/bw-mapnik/{z}/{x}/{y}.png',
+            },
+            QUICK_INTENTS: [
+                'Quiet place to read and work',
+                'Fun place for friends tonight',
+                'Amusement park with rides',
+                'Budget-friendly quick bite',
+                'Romantic date evening',
+                'Green park for calm walk'
+            ]
+        };
+
+        // UI Text Dictionary
+        const TEXT = {
+            en: {
+                appName: 'Intentra',
+                tagline: 'Places that fit your moment',
+                inputPlaceholder: 'What are you in the mood for? e.g. quiet place to work',
+                findButton: 'Find places',
+                findButtonLoading: 'Finding...',
+                resultsTitle: 'Nearby places',
+                resultsSubtitle: 'Select a place to see details',
+                emptyStateTitle: 'Ready to explore',
+                emptyStateText: 'Tell us what you\'re looking for and we\'ll find places that match your moment',
+                noResultsTitle: 'No perfect matches',
+                noResultsText: 'Couldn\'t find a perfect match nearby. Showing the closest suitable places instead.',
+                loadingText: 'Thinking through nearby options...',
+                locationPrompt: 'Getting your location...',
+                locationDenied: 'We need your location to suggest nearby places.',
+                locationError: 'Unable to get your location. Using default area.',
+                networkError: 'Having trouble connecting. Please check your network.',
+                serverError: 'Something went wrong. Please try again.',
+                unknownError: 'An unexpected error occurred.',
+                intentBannerDefault: 'Looking for places nearby',
+                within: 'Within',
+                km: 'km',
+                rating: 'Rating',
+                minRating: 'Min rating',
+                placeTypes: 'Types',
+                preferences: 'Preferences',
+                openNow: 'Open now',
+                closed: 'Closed',
+                distanceAway: 'away',
+                defaultPlaceName: 'Nearby place'
+            }
+        };
+
+        // Application State
+        const state = {
+            currentTheme: 'light',
+            currentLanguage: 'en',
+            currentLocation: null,
+            map: null,
+            markers: [],
+            userMarker: null,
+            currentResults: [],
+            currentIntent: null,
+            currentPlan: null,
+            currentInsights: null,
+            currentMatchup: null,
+            activeCardIndex: -1,
+            isSearching: false,
+            sortMode: 'score',
+            compareMode: false,
+            compareSelection: new Set(),
+            favorites: [],
+            locationSource: 'unknown',
+            currentMapTheme: 'standard',
+            tileLayer: null,
+            panelExpanded: false
+        };
+
+        // DOM Elements Cache
+        const dom = {};
+
+        // Initialize Application
+        document.addEventListener('DOMContentLoaded', () => {
+            initializeDOM();
+            initializeTheme();
+            initializeMap();
+            initializeEventListeners();
+            renderQuickIntents();
+            refreshLocationNote();
+            showStatus('info', 'Ready to find places that fit your moment');
+        });
+
+        function initializeDOM() {
+            // Cache DOM elements
+            dom.themeToggle = document.getElementById('themeToggle');
+            dom.themeIcon = document.getElementById('themeIcon');
+            dom.intentInput = document.getElementById('intentInput');
+            dom.findButton = document.getElementById('findButton');
+            dom.findButtonText = document.getElementById('findButtonText');
+            dom.quickIntents = document.getElementById('quickIntents');
+            dom.locationNote = document.getElementById('locationNote');
+            dom.openNowOnly = document.getElementById('openNowOnly');
+            dom.surpriseMode = document.getElementById('surpriseMode');
+            dom.maxDistance = document.getElementById('maxDistance');
+            dom.maxDistanceLabel = document.getElementById('maxDistanceLabel');
+            dom.intentBanner = document.getElementById('intentBanner');
+            dom.intentSummary = document.getElementById('intentSummary');
+            dom.intentDetails = document.getElementById('intentDetails');
+            dom.map = document.getElementById('map');
+            dom.mapOverlay = document.getElementById('mapOverlay');
+            dom.resultsTitle = document.getElementById('resultsTitle');
+            dom.resultsSubtitle = document.getElementById('resultsSubtitle');
+            dom.locateButton = document.getElementById('locateButton');
+            dom.fitResultsButton = document.getElementById('fitResultsButton');
+            dom.panelSizeButton = document.getElementById('panelSizeButton');
+            dom.compareModeButton = document.getElementById('compareModeButton');
+            dom.sharePlanButton = document.getElementById('sharePlanButton');
+            dom.sortSelect = document.getElementById('sortSelect');
+            dom.fitMapButton = document.getElementById('fitMapButton');
+            dom.mapStyleSelect = document.getElementById('mapStyleSelect');
+            dom.experiencePanel = document.getElementById('experiencePanel');
+            dom.planHeadline = document.getElementById('planHeadline');
+            dom.planMeta = document.getElementById('planMeta');
+            dom.planSteps = document.getElementById('planSteps');
+            dom.insightsPanel = document.getElementById('insightsPanel');
+            dom.insightsGrid = document.getElementById('insightsGrid');
+            dom.matchupBox = document.getElementById('matchupBox');
+            dom.favoritesList = document.getElementById('favoritesList');
+            dom.resultsList = document.getElementById('resultsList');
+            dom.emptyState = document.getElementById('emptyState');
+            dom.statusArea = document.getElementById('statusArea');
+        }
+
+        function initializeTheme() {
+            // Check system preference
+            const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            const savedTheme = localStorage.getItem('intentra-theme');
+            
+            if (savedTheme) {
+                state.currentTheme = savedTheme;
+            } else {
+                state.currentTheme = systemPrefersDark ? 'dark' : 'light';
+            }
+            
+            applyTheme();
+            
+            // Listen for system theme changes
+            window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
+                if (!localStorage.getItem('intentra-theme')) {
+                    state.currentTheme = e.matches ? 'dark' : 'light';
+                    applyTheme();
+                }
+            });
+        }
+
+        function applyTheme() {
+            document.documentElement.setAttribute('data-theme', state.currentTheme);
+            localStorage.setItem('intentra-theme', state.currentTheme);
+            
+            // Update theme icon
+            if (state.currentTheme === 'dark') {
+                dom.themeIcon.innerHTML = '<path d="M12 17C14.7614 17 17 14.7614 17 12C17 9.23858 14.7614 7 12 7C9.23858 7 7 9.23858 7 12C7 14.7614 9.23858 17 12 17Z" fill="currentColor"/>';
+            } else {
+                dom.themeIcon.innerHTML = '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" fill="currentColor"/>';
+            }
+        }
+
+        function applyMapTheme(theme) {
+            const tileUrl = CONFIG.MAP_THEMES[theme] || CONFIG.MAP_THEMES.standard;
+            if (state.tileLayer) {
+                state.map.removeLayer(state.tileLayer);
+            }
+
+            state.tileLayer = L.tileLayer(tileUrl, {
+                attribution: CONFIG.MAP_ATTRIBUTION,
+                maxZoom: 19,
+            });
+            state.tileLayer.addTo(state.map);
+            state.currentMapTheme = theme;
+        }
+
+        function getCategoryEmoji(category) {
+            const emojiByCategory = {
+                cafe: '☕',
+                restaurant: '🍽️',
+                fast_food: '🍔',
+                bar: '🍹',
+                park: '🌳',
+                library: '📚',
+                cinema: '🎬',
+                arcade: '🕹️',
+                amusement_park: '🎢',
+                water_park: '💦',
+                zoo: '🦁',
+                coworking: '💻',
+                fallback: '✨',
+            };
+            return emojiByCategory[category] || '📍';
+        }
+
+        function createEmojiIcon(emoji, isUser = false) {
+            return L.divIcon({
+                className: `emoji-marker ${isUser ? 'user' : ''}`,
+                html: `<span>${emoji}</span>`,
+                iconSize: [30, 30],
+                iconAnchor: [15, 15],
+            });
+        }
+
+        function fitMapToCurrentData() {
+            if (!state.map) {
+                return;
+            }
+
+            const points = [];
+            if (state.currentLocation) {
+                points.push([state.currentLocation.lat, state.currentLocation.lng]);
+            }
+
+            state.currentResults.forEach((place) => {
+                if (typeof place.lat === 'number' && typeof place.lng === 'number') {
+                    points.push([place.lat, place.lng]);
+                }
+            });
+
+            if (!points.length) {
+                return;
+            }
+
+            if (points.length === 1) {
+                state.map.setView(points[0], CONFIG.ZOOM_LEVEL);
+                return;
+            }
+
+            state.map.fitBounds(L.latLngBounds(points), {
+                padding: [40, 40],
+                maxZoom: 15,
+            });
+        }
+
+        function initializeMap() {
+            // Initialize Leaflet map
+            state.map = L.map('map', {
+                zoomControl: true,
+                scrollWheelZoom: true,
+                maxZoom: 19,
+                minZoom: 3,
+                zoomSnap: 0.5,
+            }).setView(
+                [CONFIG.DEFAULT_LOCATION.lat, CONFIG.DEFAULT_LOCATION.lng],
+                CONFIG.ZOOM_LEVEL
+            );
+            
+            applyMapTheme(state.currentMapTheme);
+
+            setTimeout(() => state.map.invalidateSize(), 120);
+        }
+
+        function initializeEventListeners() {
+            // Theme toggle
+            dom.themeToggle.addEventListener('click', () => {
+                state.currentTheme = state.currentTheme === 'light' ? 'dark' : 'light';
+                applyTheme();
+            });
+            
+            // Search button
+            dom.findButton.addEventListener('click', handleSearch);
+            dom.locateButton.addEventListener('click', handleLocate);
+            dom.fitResultsButton.addEventListener('click', fitMapToCurrentData);
+            dom.panelSizeButton.addEventListener('click', toggleResultsPanelSize);
+            dom.compareModeButton.addEventListener('click', toggleCompareMode);
+            dom.sharePlanButton.addEventListener('click', handleSharePlan);
+            dom.sortSelect.addEventListener('change', handleSortChange);
+            dom.fitMapButton.addEventListener('click', fitMapToCurrentData);
+            dom.mapStyleSelect.addEventListener('change', (event) => {
+                applyMapTheme(event.target.value);
+            });
+            dom.maxDistance.addEventListener('input', () => {
+                dom.maxDistanceLabel.textContent = `${dom.maxDistance.value} km`;
+            });
+            
+            // Enter key in input
+            dom.intentInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter' && !state.isSearching) {
+                    handleSearch();
+                }
+            });
+
+            dom.resultsList.addEventListener('click', (event) => {
+                const actionButton = event.target.closest('[data-action]');
+                if (!actionButton) return;
+                const action = actionButton.dataset.action;
+                const index = Number(actionButton.dataset.index);
+                if (!Number.isFinite(index)) return;
+
+                event.preventDefault();
+                event.stopPropagation();
+                handleRecommendationAction(action, index);
+            });
+
+            loadFavorites();
+            renderFavorites();
+            
+            // Window resize for map
+            window.addEventListener('resize', () => {
+                if (state.map) {
+                    setTimeout(() => state.map.invalidateSize(), 120);
+                }
+            });
+        }
+
+        function renderQuickIntents() {
+            dom.quickIntents.innerHTML = '';
+
+            CONFIG.QUICK_INTENTS.forEach((label) => {
+                const chip = document.createElement('button');
+                chip.type = 'button';
+                chip.className = 'intent-chip';
+                chip.textContent = label;
+                chip.addEventListener('click', () => {
+                    dom.intentInput.value = label;
+                    handleSearch();
+                });
+                dom.quickIntents.appendChild(chip);
+            });
+
+            fetch('/vibes')
+                .then((response) => response.json())
+                .then((data) => {
+                    if (!data || !Array.isArray(data.vibes)) {
+                        return;
+                    }
+
+                    data.vibes.slice(0, 6).forEach((vibe) => {
+                        const chip = document.createElement('button');
+                        chip.type = 'button';
+                        chip.className = 'intent-chip';
+                        chip.textContent = vibe.label;
+                        chip.addEventListener('click', () => {
+                            dom.intentInput.value = vibe.sample_prompt || vibe.label;
+                            handleSearch();
+                        });
+                        dom.quickIntents.appendChild(chip);
+                    });
+                })
+                .catch(() => {
+                    // Keep local fallback chips only.
+                });
+        }
+
+        async function handleLocate() {
+            try {
+                const location = await getUserLocation({ allowDefaultFallback: true });
+                state.currentLocation = location;
+                updateMapToLocation(location);
+                showStatus('info', state.locationSource === 'live' ? 'Map centered to your live location' : 'Using fallback area on map');
+            } catch (_error) {
+                showStatus('warning', 'Location unavailable. Enable browser location access and try again.');
+            }
+        }
+
+        function handleSortChange(event) {
+            state.sortMode = event.target.value;
+            if (!state.currentResults.length) return;
+
+            state.currentResults = sortRecommendations(state.currentResults, state.sortMode);
+            displayRecommendations(state.currentResults);
+            addMarkers(state.currentResults);
+        }
+
+        function toggleResultsPanelSize() {
+            state.panelExpanded = !state.panelExpanded;
+            const panel = document.querySelector('.results-panel');
+            panel.classList.toggle('expanded', state.panelExpanded);
+            dom.panelSizeButton.textContent = state.panelExpanded ? 'Compact list' : 'Expand list';
+            if (state.map) {
+                setTimeout(() => state.map.invalidateSize(), 120);
+            }
+        }
+
+        function toggleCompareMode() {
+            state.compareMode = !state.compareMode;
+            state.compareSelection.clear();
+            dom.compareModeButton.textContent = state.compareMode ? 'Exit compare' : 'Compare mode';
+            const cards = dom.resultsList.querySelectorAll('.recommendation-card');
+            cards.forEach((card) => card.classList.remove('compare-selected'));
+            showStatus('info', state.compareMode ? 'Compare mode on: select up to 2 places' : 'Compare mode off');
+        }
+
+        async function handleSharePlan() {
+            if (!state.currentResults.length) {
+                showStatus('warning', 'Search first to generate a shareable plan.');
+                return;
+            }
+
+            const top = state.currentResults.slice(0, 3).map((p, i) => `${i + 1}. ${p.name}`).join(' | ');
+            const text = `Intentra plan: ${state.currentIntent?.mood || 'explore'} - ${top}`;
+
+            if (navigator.share) {
+                try {
+                    await navigator.share({ title: 'Intentra Plan', text });
+                    return;
+                } catch (_error) {
+                    // Fall back to clipboard.
+                }
+            }
+
+            if (navigator.clipboard) {
+                await navigator.clipboard.writeText(text);
+                showStatus('success', 'Plan copied to clipboard.');
+            }
+        }
+
+        function sortRecommendations(results, mode) {
+            const sorted = [...results];
+            if (mode === 'distance') {
+                sorted.sort((a, b) => (a.distance_km || 999) - (b.distance_km || 999));
+                return sorted;
+            }
+            if (mode === 'rating') {
+                sorted.sort((a, b) => (b.rating || 0) - (a.rating || 0));
+                return sorted;
+            }
+            sorted.sort((a, b) => (b.score || 0) - (a.score || 0));
+            return sorted;
+        }
+
+        function buildDirectionsUrl(place) {
+            const destination = `${place.lat},${place.lng}`;
+            const origin = state.currentLocation
+                ? `${state.currentLocation.lat},${state.currentLocation.lng}`
+                : null;
+
+            let url = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(destination)}&travelmode=driving`;
+            if (origin) {
+                url += `&origin=${encodeURIComponent(origin)}`;
+            }
+            return url;
+        }
+
+        async function handleSearch() {
+            const query = dom.intentInput.value.trim();
+            
+            if (!query) {
+                showStatus('warning', 'Please describe what you\'re looking for');
+                dom.intentInput.focus();
+                return;
+            }
+            
+            if (state.isSearching) return;
+            
+            try {
+                setSearching(true);
+                showStatus('info', TEXT.en.loadingText);
+                
+                // Clear previous results
+                clearResults();
+                clearMarkers();
+                
+                // Get user location
+                const location = await getUserLocation({ allowDefaultFallback: false });
+                state.currentLocation = location;
+                
+                // Update map
+                updateMapToLocation(location);
+                
+                // Fetch recommendations
+                const response = await fetchRecommendations(query, location);
+                
+                if (response && response.recommendations && response.recommendations.length > 0) {
+                    state.currentResults = sortRecommendations(response.recommendations, state.sortMode);
+                    state.currentIntent = response.intent;
+                    state.currentPlan = response.plan || null;
+                    state.currentInsights = response.insights || null;
+                    state.currentMatchup = response.matchup || null;
+                    renderExperiencePlan();
+                    renderInsights();
+                    
+                    // Display results
+                    displayIntentBanner(response.intent);
+                    displayRecommendations(state.currentResults);
+                    addMarkers(state.currentResults);
+                    
+                    const count = state.currentResults.length;
+                    showStatus('success', `Found ${count} place${count !== 1 ? 's' : ''} matching your intent`);
+                } else {
+                    state.currentPlan = null;
+                    state.currentInsights = null;
+                    state.currentMatchup = null;
+                    renderExperiencePlan();
+                    renderInsights();
+                    showNoResults();
+                    showStatus('info', TEXT.en.noResultsText);
+                }
+                
+            } catch (error) {
+                console.error('Search error:', error);
+                handleSearchError(error);
+            } finally {
+                setSearching(false);
+            }
+        }
+
+        function getCachedLocation() {
+            try {
+                const raw = localStorage.getItem(CONFIG.LOCATION_CACHE_KEY);
+                if (!raw) {
+                    return null;
+                }
+
+                const data = JSON.parse(raw);
+                if (!data || typeof data.lat !== 'number' || typeof data.lng !== 'number' || typeof data.ts !== 'number') {
+                    return null;
+                }
+
+                const ageMs = Date.now() - data.ts;
+                if (ageMs > 1000 * 60 * 30) {
+                    return null;
+                }
+
+                return { lat: data.lat, lng: data.lng };
+            } catch (_error) {
+                return null;
+            }
+        }
+
+        function saveCachedLocation(location) {
+            localStorage.setItem(CONFIG.LOCATION_CACHE_KEY, JSON.stringify({ lat: location.lat, lng: location.lng, ts: Date.now() }));
+        }
+
+        function refreshLocationNote() {
+            let text = 'Location status: waiting for permission.';
+            if (state.locationSource === 'live') {
+                text = 'Location status: live location active.';
+            } else if (state.locationSource === 'cached') {
+                text = 'Location status: using recently cached location.';
+            } else if (state.locationSource === 'fallback') {
+                text = 'Location status: using fallback area (live location unavailable).';
+            }
+            dom.locationNote.textContent = text;
+        }
+
+        async function resolveBrowserLocation(options) {
+            return new Promise((resolve, reject) => {
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        resolve({
+                            lat: position.coords.latitude,
+                            lng: position.coords.longitude,
+                        });
+                    },
+                    reject,
+                    options
+                );
+            });
+        }
+
+        async function getUserLocation({ allowDefaultFallback = false } = {}) {
+            if (!navigator.geolocation) {
+                if (allowDefaultFallback) {
+                    state.locationSource = 'fallback';
+                    refreshLocationNote();
+                    return CONFIG.DEFAULT_LOCATION;
+                }
+                throw new Error('location_required');
+            }
+
+            dom.mapOverlay.classList.remove('hidden');
+            dom.mapOverlay.textContent = TEXT.en.locationPrompt;
+
+            try {
+                const coarse = await resolveBrowserLocation({
+                    enableHighAccuracy: false,
+                    timeout: 5000,
+                    maximumAge: 120000,
+                });
+                state.locationSource = 'live';
+                saveCachedLocation(coarse);
+                refreshLocationNote();
+                return coarse;
+            } catch (_coarseError) {
+                try {
+                    const precise = await resolveBrowserLocation({
+                        enableHighAccuracy: true,
+                        timeout: 10000,
+                        maximumAge: 0,
+                    });
+                    state.locationSource = 'live';
+                    saveCachedLocation(precise);
+                    refreshLocationNote();
+                    return precise;
+                } catch (error) {
+                    const cached = getCachedLocation();
+                    if (cached) {
+                        state.locationSource = 'cached';
+                        refreshLocationNote();
+                        showStatus('warning', 'Using your recent location because live location lookup failed.');
+                        return cached;
+                    }
+
+                    if (allowDefaultFallback) {
+                        state.locationSource = 'fallback';
+                        refreshLocationNote();
+                        return CONFIG.DEFAULT_LOCATION;
+                    }
+
+                    if (error.code === 1) {
+                        throw new Error('location_denied');
+                    }
+                    throw new Error('location_required');
+                }
+            } finally {
+                dom.mapOverlay.classList.add('hidden');
+            }
+        }
+
+        function updateMapToLocation(location) {
+            state.map.setView([location.lat, location.lng], CONFIG.ZOOM_LEVEL);
+            
+            // Remove previous user marker
+            if (state.userMarker) {
+                state.userMarker.remove();
+            }
+            
+            // Add new user marker
+            state.userMarker = L.marker([location.lat, location.lng], {
+                icon: createEmojiIcon('🧭', true)
+            }).addTo(state.map);
+            
+            state.userMarker.bindPopup('Your location').openPopup();
+        }
+
+        async function fetchRecommendations(query, location) {
+            try {
+                const maxDistanceKm = Number(dom.maxDistance.value || 8);
+                const response = await fetch(CONFIG.API_ENDPOINT, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        query: query,
+                        latitude: location.lat,
+                        longitude: location.lng,
+                        max_distance_km: maxDistanceKm,
+                        open_now_only: Boolean(dom.openNowOnly.checked),
+                        surprise_mode: Boolean(dom.surpriseMode.checked),
+                    })
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+                
+                return await response.json();
+            } catch (error) {
+                if (error.name === 'TypeError') {
+                    throw new Error('network');
+                }
+                throw error;
+            }
+        }
+
+        function displayIntentBanner(intent) {
+            if (!intent) {
+                dom.intentBanner.classList.add('hidden');
+                return;
+            }
+            
+            // Build summary from intent
+            const summaryParts = [];
+            
+            if (intent.mood) {
+                summaryParts.push(intent.mood);
+            }
+            
+            if (intent.place_types && intent.place_types.length > 0) {
+                const types = intent.place_types.slice(0, 3).join(', ');
+                summaryParts.push(types.toLowerCase());
+            }
+            
+            let summary = 'Looking for ';
+            if (summaryParts.length > 0) {
+                summary += summaryParts.join(' ');
+            } else {
+                summary += 'places';
+            }
+            summary += ' nearby';
+            
+            dom.intentSummary.textContent = summary;
+            
+            // Build details
+            const details = [];
+            
+            if (intent.radius_km) {
+                details.push(`
+                    <div class="intent-detail">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <circle cx="12" cy="12" r="10" stroke-width="1.5"/>
+                            <circle cx="12" cy="12" r="3" stroke-width="1.5"/>
+                        </svg>
+                        <span>${TEXT.en.within} ${intent.radius_km} ${TEXT.en.km}</span>
+                    </div>
+                `);
+            }
+            
+            if (intent.min_rating) {
+                details.push(`
+                    <div class="intent-detail">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                        <span>${TEXT.en.minRating} ${intent.min_rating}+</span>
+                    </div>
+                `);
+            }
+            
+            if (intent.preferences && intent.preferences.length > 0) {
+                const prefs = intent.preferences.slice(0, 2).join(', ');
+                details.push(`
+                    <div class="intent-detail">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <path d="M9 12L11 14L15 10M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                        <span>${prefs}</span>
+                    </div>
+                `);
+            }
+            
+            dom.intentDetails.innerHTML = details.join('');
+            dom.intentBanner.classList.remove('hidden');
+        }
+
+        function displayRecommendations(recommendations) {
+            dom.emptyState.classList.add('hidden');
+            
+            // Update titles
+            dom.resultsTitle.textContent = `${recommendations.length} place${recommendations.length !== 1 ? 's' : ''} found`;
+            dom.resultsSubtitle.textContent = 'Select a place to see it on the map';
+            
+            // Clear previous cards
+            dom.resultsList.innerHTML = '';
+            
+            // Create cards
+            recommendations.forEach((place, index) => {
+                const card = document.createElement('div');
+                card.className = 'recommendation-card';
+                card.dataset.index = index;
+                
+                // Safe data access
+                const name = place.name && place.name !== "Unnamed place" 
+                    ? place.name 
+                    : TEXT.en.defaultPlaceName;
+                
+                const distance = place.distance_km 
+                    ? `${place.distance_km.toFixed(1)} km ${TEXT.en.distanceAway}`
+                    : '';
+                
+                const why = place.why || 'A good match for your search';
+                const rating = place.rating || 0;
+                const isOpen = place.open_now === true;
+                const category = place.category || (place.types && place.types[0]) || 'place';
+                const directionsUrl = buildDirectionsUrl(place);
+                const categoryEmoji = getCategoryEmoji(category);
+                
+                card.innerHTML = `
+                    <div class="card-header">
+                        <div class="place-name">${categoryEmoji} ${name}</div>
+                        <div class="distance">${distance}</div>
+                    </div>
+                    <div class="text-sm" style="color: var(--text-tertiary); text-transform: capitalize;">${category.replaceAll('_', ' ')}</div>
+                    <div class="why-text">${why}</div>
+                    <div class="card-footer">
+                        <div class="rating">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                                <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" 
+                                    fill="${rating >= 4 ? '#fbbf24' : rating >= 3 ? '#f59e0b' : '#d97706'}" 
+                                    stroke="${rating >= 4 ? '#fbbf24' : rating >= 3 ? '#f59e0b' : '#d97706'}" 
+                                    stroke-width="1"/>
+                            </svg>
+                            <span>${rating.toFixed(1)}</span>
+                        </div>
+                        <div class="status ${isOpen ? 'open' : 'closed'}">
+                            ${isOpen ? TEXT.en.openNow : TEXT.en.closed}
+                        </div>
+                        <div class="card-actions">
+                            <a class="card-action" target="_blank" rel="noopener noreferrer" href="${directionsUrl}" data-action="navigate" data-index="${index}">Navigate</a>
+                            <button class="card-action" type="button" data-action="focus" data-index="${index}">Focus</button>
+                            <button class="card-action" type="button" data-action="save" data-index="${index}">Save</button>
+                        </div>
+                    </div>
+                `;
+                
+                // Add click handler
+                card.addEventListener('click', () => highlightPlace(index));
+                
+                dom.resultsList.appendChild(card);
+            });
+            
+            // Highlight first card by default
+            if (recommendations.length > 0) {
+                highlightPlace(0);
+                fitMapToCurrentData();
+            }
+        }
+
+        function addMarkers(recommendations) {
+            // Clear previous markers
+            clearMarkers();
+            
+            recommendations.forEach((place, index) => {
+                // Safe coordinate access
+                const lat = place.lat;
+                const lng = place.lng;
+                
+                if (typeof lat === 'number' && typeof lng === 'number' && !isNaN(lat) && !isNaN(lng)) {
+                    const name = place.name && place.name !== "Unnamed place" 
+                        ? place.name 
+                        : TEXT.en.defaultPlaceName;
+                    
+                    const marker = L.marker([lat, lng], {
+                        icon: createEmojiIcon(getCategoryEmoji(place.category || 'fallback'))
+                    }).addTo(state.map);
+                    
+                    // Create popup content
+                    const directionsUrl = buildDirectionsUrl(place);
+                    const popupContent = `
+                        <div style="min-width: 200px; padding: 8px;">
+                            <div style="font-weight: 600; margin-bottom: 4px; color: var(--text-primary);">
+                                ${name}
+                            </div>
+                            ${place.distance_km ? `
+                                <div style="color: var(--text-secondary); font-size: 13px; margin-bottom: 4px;">
+                                    ${place.distance_km.toFixed(1)} km away
+                                </div>
+                            ` : ''}
+                            ${place.why ? `
+                                <div style="color: var(--text-secondary); font-size: 13px; margin-top: 8px; border-top: 1px solid var(--border-light); padding-top: 8px;">
+                                    ${place.why}
+                                </div>
+                            ` : ''}
+                            <a href="${directionsUrl}" target="_blank" rel="noopener noreferrer" style="margin-top: 8px; display: inline-block; color: #1d4ed8; font-size: 13px; text-decoration: none;">Open directions</a>
+                        </div>
+                    `;
+                    
+                    marker.bindPopup(popupContent);
+                    
+                    // Add click handler for marker-card synchronization
+                    marker.on('click', () => {
+                        highlightPlace(index);
+                    });
+                    
+                    state.markers.push(marker);
+                }
+            });
+
+            // Frame map to show current location and recommendations.
+            const boundsPoints = [];
+            if (state.currentLocation) {
+                boundsPoints.push([state.currentLocation.lat, state.currentLocation.lng]);
+            }
+            state.markers.forEach((marker) => {
+                const latLng = marker.getLatLng();
+                boundsPoints.push([latLng.lat, latLng.lng]);
+            });
+
+            if (boundsPoints.length > 1) {
+                state.map.fitBounds(boundsPoints, {
+                    padding: [32, 32],
+                    maxZoom: 15,
+                });
+            } else if (boundsPoints.length === 1) {
+                state.map.setView(boundsPoints[0], 14);
+            }
+
+            setTimeout(() => state.map.invalidateSize(), 80);
+        }
+
+        function highlightPlace(index) {
+            // Validate index
+            if (index < 0 || index >= state.currentResults.length) return;
+            
+            // Remove active class from all cards
+            const cards = dom.resultsList.querySelectorAll('.recommendation-card');
+            cards.forEach(card => card.classList.remove('active'));
+            
+            // Add active class to selected card
+            const selectedCard = cards[index];
+            if (selectedCard) {
+                selectedCard.classList.add('active');
+                selectedCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                state.activeCardIndex = index;
+
+                if (state.compareMode) {
+                    selectedCard.classList.toggle('compare-selected');
+
+                    if (state.compareSelection.has(index)) {
+                        state.compareSelection.delete(index);
+                    } else {
+                        if (state.compareSelection.size >= 2) {
+                            const first = state.compareSelection.values().next().value;
+                            state.compareSelection.delete(first);
+                            const firstCard = cards[first];
+                            if (firstCard) {
+                                firstCard.classList.remove('compare-selected');
+                            }
+                        }
+                        state.compareSelection.add(index);
+                    }
+
+                    renderCompareStatus();
+                }
+            }
+            
+            // Center map on place and open marker popup
+            const place = state.currentResults[index];
+            if (place && typeof place.lat === 'number' && typeof place.lng === 'number') {
+                state.map.setView([place.lat, place.lng], CONFIG.ZOOM_LEVEL_DETAIL);
+                
+                // Open corresponding marker popup
+                const marker = state.markers[index];
+                if (marker && marker.openPopup) {
+                    marker.openPopup();
+                }
+            }
+        }
+
+        function clearResults() {
+            dom.resultsList.innerHTML = '';
+            dom.emptyState.classList.remove('hidden');
+            dom.intentBanner.classList.add('hidden');
+            state.currentResults = [];
+            state.currentIntent = null;
+            state.currentPlan = null;
+            state.currentInsights = null;
+            state.currentMatchup = null;
+            state.activeCardIndex = -1;
+            state.compareSelection.clear();
+            
+            // Reset titles
+            dom.resultsTitle.textContent = TEXT.en.resultsTitle;
+            dom.resultsSubtitle.textContent = TEXT.en.resultsSubtitle;
+            renderExperiencePlan();
+            renderInsights();
+        }
+
+        function clearMarkers() {
+            state.markers.forEach(marker => marker.remove());
+            state.markers = [];
+        }
+
+        function showNoResults() {
+            dom.emptyState.innerHTML = `
+                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" stroke="currentColor" stroke-width="1.5"/>
+                    <path d="M15 9L9 15" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                    <path d="M9 9L15 15" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                </svg>
+                <h3>${TEXT.en.noResultsTitle}</h3>
+                <p>${TEXT.en.noResultsText}</p>
+            `;
+            dom.emptyState.classList.remove('hidden');
+        }
+
+        function setSearching(isSearching) {
+            state.isSearching = isSearching;
+            dom.findButton.disabled = isSearching;
+            
+            if (isSearching) {
+                dom.findButton.innerHTML = `
+                    <span class="spinner"></span>
+                    <span id="findButtonText">${TEXT.en.findButtonLoading}</span>
+                `;
+                dom.findButtonText = document.getElementById('findButtonText');
+            } else {
+                dom.findButton.innerHTML = `
+                    <span id="findButtonText">${TEXT.en.findButton}</span>
+                `;
+                dom.findButtonText = document.getElementById('findButtonText');
+            }
+        }
+
+        function handleSearchError(error) {
+            let message = TEXT.en.unknownError;
+            
+            if (error.message === 'network') {
+                message = TEXT.en.networkError;
+            } else if (error.message.includes('HTTP')) {
+                message = TEXT.en.serverError;
+            } else if (error.message === 'location_denied') {
+                message = 'Location permission denied. Enable it in browser site settings.';
+            } else if (error.message === 'location_required') {
+                message = 'Live location unavailable. Click Locate me, allow permission, then retry.';
+            }
+            
+            showStatus('error', message);
+            showNoResults();
+        }
+
+        function showStatus(type, message) {
+            const status = document.createElement('div');
+            status.className = `status-message ${type}`;
+            
+            let icon = '';
+            switch (type) {
+                case 'success':
+                    icon = `
+                        <svg class="status-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <path d="M20 6L9 17L4 12" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    `;
+                    break;
+                case 'error':
+                    icon = `
+                        <svg class="status-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" stroke-width="2"/>
+                            <path d="M15 9L9 15" stroke-width="2" stroke-linecap="round"/>
+                            <path d="M9 9L15 15" stroke-width="2" stroke-linecap="round"/>
+                        </svg>
+                    `;
+                    break;
+                case 'warning':
+                    icon = `
+                        <svg class="status-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <path d="M12 9V13" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M12 17H12.01" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" stroke-width="2"/>
+                        </svg>
+                    `;
+                    break;
+                default:
+                    icon = `
+                        <svg class="status-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" stroke-width="2"/>
+                            <path d="M12 16V12" stroke-width="2" stroke-linecap="round"/>
+                            <path d="M12 8H12.01" stroke-width="2" stroke-linecap="round"/>
+                        </svg>
+                    `;
+            }
+            
+            status.innerHTML = `
+                ${icon}
+                <div class="status-content">
+                    <div class="status-text">${message}</div>
+                </div>
+            `;
+            
+            dom.statusArea.appendChild(status);
+            
+            // Auto-remove after 5 seconds
+            setTimeout(() => {
+                if (status.parentNode) {
+                    status.style.opacity = '0';
+                    status.style.transform = 'translateX(100%) scale(0.9)';
+                    setTimeout(() => status.remove(), 300);
+                }
+            }, 5000);
+        }
+
+        function handleRecommendationAction(action, index) {
+            if (action === 'focus') {
+                highlightPlace(index);
+                return;
+            }
+
+            if (action === 'save') {
+                const place = state.currentResults[index];
+                if (!place) {
+                    return;
+                }
+
+                saveFavorite(place);
+                return;
+            }
+
+            if (action === 'navigate') {
+                const place = state.currentResults[index];
+                if (!place) {
+                    return;
+                }
+                const url = buildDirectionsUrl(place);
+                window.open(url, '_blank', 'noopener,noreferrer');
+            }
+        }
+
+        function renderExperiencePlan() {
+            if (!state.currentPlan) {
+                dom.experiencePanel.classList.add('hidden');
+                dom.planHeadline.textContent = 'Experience plan';
+                dom.planMeta.textContent = '';
+                dom.planSteps.innerHTML = '';
+                return;
+            }
+
+            dom.experiencePanel.classList.remove('hidden');
+            dom.planHeadline.textContent = state.currentPlan.headline;
+            dom.planMeta.textContent = `${state.currentPlan.best_time} · ${state.currentPlan.estimated_duration_minutes} min`;
+            dom.planSteps.innerHTML = '';
+
+            (state.currentPlan.steps || []).forEach((step) => {
+                const node = document.createElement('div');
+                node.className = 'plan-step';
+                node.textContent = `${step.title}: ${step.reason}`;
+                dom.planSteps.appendChild(node);
+            });
+        }
+
+        function renderInsights() {
+            if (!state.currentInsights) {
+                dom.insightsPanel.classList.add('hidden');
+                dom.insightsGrid.innerHTML = '';
+                dom.matchupBox.textContent = '';
+                return;
+            }
+
+            dom.insightsPanel.classList.remove('hidden');
+            dom.insightsGrid.innerHTML = `
+                <div class="insight-item">Diversity index: ${state.currentInsights.diversity_index}</div>
+                <div class="insight-item">Avg distance: ${state.currentInsights.average_distance_km} km</div>
+                <div class="insight-item">Open now ratio: ${Math.round(state.currentInsights.open_now_ratio * 100)}%</div>
+                <div class="insight-item">Top category: ${(state.currentInsights.top_category || '').replaceAll('_', ' ')}</div>
+            `;
+
+            if (state.currentMatchup) {
+                dom.matchupBox.textContent = `Head-to-head: ${state.currentMatchup.left_place} vs ${state.currentMatchup.right_place}. Winner: ${state.currentMatchup.winner}. ${state.currentMatchup.reason}`;
+            } else {
+                dom.matchupBox.textContent = '';
+            }
+        }
+
+        function renderCompareStatus() {
+            if (state.compareSelection.size < 2) {
+                return;
+            }
+
+            const [aIndex, bIndex] = Array.from(state.compareSelection);
+            const a = state.currentResults[aIndex];
+            const b = state.currentResults[bIndex];
+            if (!a || !b) {
+                return;
+            }
+
+            const better = (a.score || 0) >= (b.score || 0) ? a : b;
+            showStatus('success', `Compare: ${better.name} is the stronger match for this intent.`);
+        }
+
+        function loadFavorites() {
+            try {
+                const raw = localStorage.getItem('intentra-favorites');
+                state.favorites = raw ? JSON.parse(raw) : [];
+            } catch (_error) {
+                state.favorites = [];
+            }
+        }
+
+        function persistFavorites() {
+            localStorage.setItem('intentra-favorites', JSON.stringify(state.favorites.slice(0, 20)));
+        }
+
+        function saveFavorite(place) {
+            const exists = state.favorites.some((f) => f.name === place.name && f.lat === place.lat && f.lng === place.lng);
+            if (exists) {
+                showStatus('info', 'Already in saved places.');
+                return;
+            }
+
+            state.favorites.unshift({
+                name: place.name,
+                maps_url: place.maps_url,
+                lat: place.lat,
+                lng: place.lng,
+            });
+            persistFavorites();
+            renderFavorites();
+            showStatus('success', 'Saved to your places list.');
+        }
+
+        function renderFavorites() {
+            if (!state.favorites.length) {
+                dom.favoritesList.textContent = 'No saved places yet.';
+                return;
+            }
+
+            dom.favoritesList.innerHTML = '';
+            state.favorites.slice(0, 6).forEach((fav) => {
+                const row = document.createElement('div');
+                row.innerHTML = `<a href="${fav.maps_url || `https://www.google.com/maps/search/?api=1&query=${fav.lat},${fav.lng}`}" target="_blank" rel="noopener noreferrer" style="color: inherit; text-decoration: none;">• ${fav.name}</a>`;
+                dom.favoritesList.appendChild(row);
+            });
+        }
+    </script>
+</body>
+</html>
